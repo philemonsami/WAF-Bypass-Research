@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAF Validation Framework</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <div class="status-badge">
+                <div class="dot"></div> Server Online & Vulnerable
+            </div>
+            <h1>WAF Validation <span class="gradient-text">Framework</span></h1>
+            <p class="subtitle">A purposefully insecure backend designed to evaluate the rule sets, normalization behaviors, and bypass mitigation strategies of Web Application Firewalls in real-time.</p>
+        </header>
+
+        <div class="divider"></div>
+
+        <section class="endpoints-grid">
+            <a href="/sqli?username=admin" class="card sqli">
+                <div class="card-icon">❖</div>
+                <h3>SQL Injection</h3>
+                <div class="path-box">
+                    <span class="method">GET</span>
+                    <span class="path">/sqli?username=...</span>
+                </div>
+                <p class="description">Tests database parsing impedance. Appends raw string inputs to a SQLite backend, allowing testing of inline comments (`/**/`), hex encoding, and whitespace manipulation.</p>
+            </a>
+
+            <a href="/xss?name=test" class="card xss">
+                <div class="card-icon">⚡</div>
+                <h3>Cross-Site Scripting</h3>
+                <div class="path-box">
+                    <span class="method">GET</span>
+                    <span class="path">/xss?name=...</span>
+                </div>
+                <p class="description">Evaluates frontend sanitation regex. Try injecting obscure HTML5 event handlers (`onpointerenter`) or utilizing double URL encoding to bypass filter layers.</p>
+            </a>
+
+            <a href="/cmd?ip=127.0.0.1" class="card cmd">
+                <div class="card-icon"></div>
+                <h3>Command Injection</h3>
+                <div class="path-box">
+                    <span class="method">POST</span>
+                    <span class="path">/cmd?ip=...</span>
+                </div>
+                <p class="description">Triggers OS-level commands. Useful for checking if WAF rules accurately identify common shell separators like `;`, `&&`, or parameter passing mechanisms.</p>
+            </a>
+
+            <a href="/lfi?file=app.py" class="card lfi">
+                <div class="card-icon">▤</div>
+                <h3>Local File Inclusion</h3>
+                <div class="path-box">
+                    <span class="method">GET</span>
+                    <span class="path">/lfi?file=...</span>
+                </div>
+                <p class="description">Checks directory traversal normalization. Use self-referential directories (`/././`) or over-slashing (`////`) to check WAF path resolving limits.</p>
+            </a>
+
+            <a href="/ssrf?url=http://example.com" class="card ssrf">
+                <div class="card-icon">⎘</div>
+                <h3>Server-Side Request</h3>
+                <div class="path-box">
+                    <span class="method">GET</span>
+                    <span class="path">/ssrf?url=...</span>
+                </div>
+                <p class="description">Analyze SSRF metadata and protocol handlers. Attempt to fetch internal resources (e.g., `127.0.0.1` or `169.254.169.254`) utilizing varied input structures.</p>
+            </a>
+
+            <a href="/eval?calc=2+2" class="card eval">
+                <div class="card-icon">⟳</div>
+                <h3>Eval Injection</h3>
+                <div class="path-box">
+                    <span class="method">GET</span>
+                    <span class="path">/eval?calc=...</span>
+                </div>
+                <p class="description">Test deeply nested payload execution via Python `eval()`. Excellent for bypassing signature engines relying strictly on language-specific heuristics.</p>
+            </a>
+        </section>
+
+        <section class="details-section">
+            <h2>Testing Methodology Details</h2>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <h4>Impedance Mismatch</h4>
+                    <p>When the WAF decodes a payload differently than this backend application, bypasses occur. This environment relies heavily on Python and Flask’s specific URL parsing logic. Test if the WAF catches multi-layer encoding.</p>
+                </div>
+                <div class="detail-item">
+                    <h4>Request Smuggling</h4>
+                    <p>By leveraging an intermediary proxy (like a WAF), manipulate the `Content-Length` and `Transfer-Encoding` headers in your HTTP requests. See if you can desync the pipeline leading up to this server.</p>
+                </div>
+                <div class="detail-item">
+                    <h4>Parameter Pollution</h4>
+                    <p>Send multiple instances of the same parameter (e.g., `?username=1&username=2`). Flask natively grabs the <em>first</em> parameter by default when using `request.args.get()`, while many WAFs inspect the last.</p>
+                </div>
+                <div class="detail-item">
+                    <h4>Obfuscation Tolerance</h4>
+                    <p>Automate testing of this endpoint using the Python scripts provided in the `/experiments/` directory to methodically insert junk bytes, inline comments, and syntax variations to exhaust regex processing engines.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Academic Research & Validation Purposes Only.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Add subtle mouse-tracking glow effect to cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body>
+</html>
